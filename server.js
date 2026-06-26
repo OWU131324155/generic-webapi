@@ -10,16 +10,20 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 app.use(express.static('public'));
 
+app.get('/healthz', (req, res) => {
+    res.json({ ok: true });
+});
+
 // ===== 設定 =====
 // 利用するLLMプロバイダを選択します（'openai' または 'gemini'）
-const PROVIDER = 'openai';
+const PROVIDER = process.env.LLM_PROVIDER || 'openai';
 
 // プロバイダごとに利用するモデル
 const MODELS = {
     openai: 'gpt-5.5',        // OpenAI（デフォルト）
     gemini: 'gemini-3.5-flash', // Google Gemini
 };
-const MODEL = MODELS[PROVIDER];
+const MODEL = process.env.LLM_MODEL || MODELS[PROVIDER];
 
 const PROMPTS = {
     quiz: 'prompt.md',
