@@ -848,14 +848,9 @@
                 renderScene(scene);
             } catch (error) {
                 console.error(error);
-                statusEl.textContent = 'AI生成に失敗したため、5分体験モードで続行します。';
-                statusEl.style.color = '#b7791f';
-                showToast('5分体験モードへ切り替えました');
-                state.caseName = 'demo';
-                state.demoVariant = pickDemoVariant();
-                state.demoCase = pickLocalDemoCase();
-                state.world = state.baseWorld + '\nAI生成に失敗したため、ローカル体験版として進行する。';
-                renderScene(buildLocalDemoScene(choiceLabel));
+                statusEl.textContent = 'AI生成に失敗しました。Renderの環境変数とAPIキーを確認してください: ' + error.message;
+                statusEl.style.color = '#c53030';
+                showToast('AI生成に失敗しました');
             } finally {
                 setBusy(false);
             }
