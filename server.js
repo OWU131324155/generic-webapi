@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 // API Key などの環境変数は .env.local から読み込む
 require('dotenv').config({ path: '.env.local' });
 
@@ -20,12 +21,19 @@ const MODELS = {
 };
 const MODEL = MODELS[PROVIDER];
 
-let promptTemplate;
-try {
-    promptTemplate = fs.readFileSync('prompt.md', 'utf8');
-} catch (error) {
-    console.error('Error reading prompt.md:', error);
-    process.exit(1);
+const PROMPTS = {
+    quiz: 'prompt.md',
+    story: path.join('prompts', 'story.md'),
+};
+
+const promptTemplates = {};
+for (const [appId, promptPath] of Object.entries(PROMPTS)) {
+    try {
+        promptTemplates[appId] = fs.readFileSync(promptPath, 'utf8');
+    } catch (error) {
+        console.error(`Error reading ${promptPath}:`, error);
+        process.exit(1);
+    }
 }
 
 const OPENAI_API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
@@ -45,7 +53,12 @@ app.post('/api/', async (req, res) => {
     try {
         // title と、変数置換に使うその他のキーを受け取る
         // （prompt.md がプロンプトを定義するので、リクエストでの上書きは許可しない）
-        const { title = 'Generated Content', ...variables } = req.body;
+        const { title = 'Generated Content', app: appId = 'quiz', ...variables } = req.body;
+
+        const promptTemplate = promptTemplates[appId];
+        if (!promptTemplate) {
+            return res.status(400).json({ error: 'Invalid app configuration' });
+        }
 
         // count が指定されている場合は 1〜MAX_COUNT の範囲に収める
         if (variables.count !== undefined) {
@@ -107,7 +120,7 @@ async function callOpenAI(prompt) {
             messages: [
                 { role: 'system', content: prompt }
             ],
-            max_completion_tokens: 2000,
+            max_completion_tokens: 5000,
             response_format: { type: "json_object" }
         })
     });
