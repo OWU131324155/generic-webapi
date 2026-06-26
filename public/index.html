@@ -835,8 +835,15 @@
                 });
 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'API error');
+                    const errorText = await response.text();
+                    let message = errorText || response.statusText;
+                    try {
+                        const error = JSON.parse(errorText);
+                        message = error.error || message;
+                    } catch (parseError) {
+                        message = errorText || response.statusText;
+                    }
+                    throw new Error(message);
                 }
 
                 const payload = await response.json();

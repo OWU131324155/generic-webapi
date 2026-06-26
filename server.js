@@ -92,9 +92,8 @@ app.post('/api/', async (req, res) => {
         });
 
     } catch (error) {
-        // 詳細はサーバーログにのみ出力し、クライアントには汎用メッセージを返す
         console.error('API Error:', error);
-        res.status(500).json({ error: 'Failed to generate content. Please try again.' });
+        res.status(500).json({ error: error.message || 'Failed to generate content. Please try again.' });
     }
 });
 
@@ -108,9 +107,9 @@ function fillTemplate(template, variables) {
 }
 
 async function callOpenAI(prompt) {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY || process.env.API_KEY;
     if (!apiKey) {
-        throw new Error('OPENAI_API_KEY environment variable is not set');
+        throw new Error('OPENAI_API_KEY is not set in Render environment variables');
     }
 
     const response = await fetch(OPENAI_API_ENDPOINT, {
@@ -130,8 +129,15 @@ async function callOpenAI(prompt) {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'OpenAI API error');
+        const errorText = await response.text();
+        let message = errorText;
+        try {
+            const error = JSON.parse(errorText);
+            message = error.error?.message || errorText;
+        } catch (parseError) {
+            message = errorText || response.statusText;
+        }
+        throw new Error(`OpenAI API error (${response.status}): ${message}`);
     }
 
     const data = await response.json();
@@ -140,9 +146,9 @@ async function callOpenAI(prompt) {
 }
 
 async function callGemini(prompt) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
     if (!apiKey) {
-        throw new Error('GEMINI_API_KEY environment variable is not set');
+        throw new Error('GEMINI_API_KEY is not set in Render environment variables');
     }
 
     const response = await fetch(`${GEMINI_API_BASE_URL}${MODEL}:generateContent?key=${apiKey}`, {
@@ -162,8 +168,15 @@ async function callGemini(prompt) {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Gemini API error');
+        const errorText = await response.text();
+        let message = errorText;
+        try {
+            const error = JSON.parse(errorText);
+            message = error.error?.message || errorText;
+        } catch (parseError) {
+            message = errorText || response.statusText;
+        }
+        throw new Error(`Gemini API error (${response.status}): ${message}`);
     }
 
     const data = await response.json();
