@@ -168,6 +168,10 @@ body.hotel-case {
     justify-content: flex-end;
 }
 
+.header-actions .btn {
+    white-space: nowrap;
+}
+
 .settings-panel {
     background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(242, 248, 245, 0.94));
@@ -1466,13 +1470,13 @@ body.hotel-case {
     background: #e7a04e;
 }
 
-.secondary-btn {
+.story-page .secondary-btn {
     background: #eef3f1;
     border-color: #d3dfdd;
     color: #26363c;
 }
 
-.secondary-btn:hover {
+.story-page .secondary-btn:hover {
     box-shadow: 0 4px 12px rgba(23, 36, 43, 0.18);
 }
 
@@ -1969,6 +1973,10 @@ body.story-page .scene-text::before {
         grid-template-columns: 1fr;
     }
 
+    .preset-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .setup-layout,
     .scene-stage,
     .investigation-layout,
@@ -1996,6 +2004,19 @@ body.story-page .scene-text::before {
         display: flex;
         flex-direction: column;
         padding: 18px;
+    }
+
+    .header-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        justify-content: stretch;
+    }
+
+    .header-actions .btn {
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: center;
+        white-space: normal;
     }
 
     .preset-grid,
@@ -2049,6 +2070,16 @@ body.story-page .scene-text::before {
     .choice-index {
         height: 36px;
         width: 36px;
+    }
+
+    .visual-caption {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .visual-caption strong {
+        max-width: 100%;
     }
 
     .intent-chip {
